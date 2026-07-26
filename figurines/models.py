@@ -28,4 +28,4 @@ class Step(models.Model):
         ordering = ["ordre"]
 
     def __str__(self):
-        return f"{self.figurine.nom} - {self.description}"
+        return f"{self.figurine.nom} - {self.description} - {self.get_outil_display()}"

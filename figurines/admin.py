@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Figurine, Step
 
-# Register your models here.
+admin.site.register(Figurine)
+admin.site.register(Step)
