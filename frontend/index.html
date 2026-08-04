@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Paint Codex</title>
+</head>
+
+<body>
+    <h1>Paint Codex</h1>
+    <pre id="figurines">
+    {
+        le JSON apparaitra ici
+    }
+    </pre>
+    <script>
+        fetch("http://127.0.0.1:8000/figurines/")
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(figurines) {
+                let listFigurines = "";
+                listFigurines += "<ul>";
+
+                for(const figurine of figurines) {
+                    listFigurines += "<li>";
+                    listFigurines += figurine.nom;
+                    listFigurines += "</li>";
+                }
+
+                listFigurines += "</ul>";
+
+                const element = document.getElementById("figurines");
+                element.innerHTML = listFigurines;
+            });
+    </script>
+</body>
+
+</html>
