@@ -4,6 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Paint Codex</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+    
+        input,
+        select,
+        button {
+            font-size: 16px;
+            padding: 8px;
+            margin: 4px 0;
+        }
+    
+        form {
+            margin-bottom: 24px;
+        }
+    
+        input,
+        select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 
 <body>
@@ -13,44 +39,148 @@
         le JSON apparaitra ici
     }
     </pre>
+    <form id="ajouterFig">
+        <label for="nomFig">Figurine :</label>
+        <input type="text" id="nomFig" required>
+        <button>Ajouter</button>
+    </form>
+    <br/>
+    <form id="ajouterStep">
+        <p>Step :</p>
+        <label for="figurineStep">Figurine :</label>
+        <select id="figurineStep" required>
+        </select>
+        
+        <label for="descriptionStep">Description :</label>
+        <input type="text" id="descriptionStep" required>
+
+        <label for="outilStep">Outil :</label>
+        <select id="outilStep" required>
+            <option value="pinceau">Pinceau</option>
+            <option value="bombe">Bombe</option>
+            <option value="aerographe">Aérographe</option>
+            <option value="autre">Autre</option>
+        </select>
+
+        <label for="ordreStep">Ordre :</label>
+        <input type="number" id="ordreStep" required>
+
+        <button>Ajouter</button>
+    </form>
     <script>
-        Promise.all([
-            fetch("http://127.0.0.1:8000/figurines/").then(function(response) {
-                return response.json();
-            }),
-            fetch("http://127.0.0.1:8000/steps/").then(function(response) {
-                return response.json();
-            })
-        ])
-        .then(function(resultats) {
-            const figurines = resultats[0];
-            const steps = resultats[1];
+        function chargerDonnees() {
+            Promise.all([
+                fetch("http://127.0.0.1:8000/figurines/").then(function(response) {
+                    return response.json();
+                }),
+                fetch("http://127.0.0.1:8000/steps/").then(function(response) {
+                    return response.json();
+                })
+            ])
+            .then(function(resultats) {
+                const figurines = resultats[0];
+                const steps = resultats[1];
 
-            let html = "";
-            html += "<ul>";
-
-            for(const figurine of figurines) {
-                html += "<li>";
-                html += figurine.nom;
-                
+                let html = "";
                 html += "<ul>";
-                for(const step of steps) {
-                    if(step.figurine === figurine.id) {
-                        html += "<li>";
-                        html += "#" + step.ordre + " " + step.description + " / " + step.outil;
-                        html += "</li>";
+
+
+                const select = document.getElementById("figurineStep");
+                select.innerHTML = "";
+
+                for(const figurine of figurines) {
+
+                    const option = document.createElement("option");
+                    option.value = figurine.id;
+                    option.textContent = figurine.nom;
+
+                    select.appendChild(option);
+
+                    html += "<li>";
+                    html += figurine.nom;
+                
+                    html += "<ul>";
+                    for(const step of steps) {
+                        if(step.figurine === figurine.id) {
+                            html += "<li>";
+                            html += "#" + step.ordre + " " + step.description + " / " + step.outil;
+                            html += "</li>";
+                        }
                     }
+                    html += "</ul>";
+
+                    html += "</li>";
                 }
+
                 html += "</ul>";
 
-                html += "</li>";
-            }
+                const element = document.getElementById("figurines");
+                element.innerHTML = html;
+            });
+        }
+        chargerDonnees();
 
-            html += "</ul>";
+        const formFig = document.getElementById("ajouterFig");
 
-            const element = document.getElementById("figurines");
-            element.innerHTML = html;
+        formFig.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const nom = document.getElementById("nomFig").value;
+
+            const nouvelleFigurine = {
+                nom: nom
+            };
+
+            fetch("http://127.0.0.1:8000/figurines/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(nouvelleFigurine)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(figurineCreee) {
+                console.log(figurineCreee);
+                chargerDonnees();
+            });
         });
+
+        const formStep = document.getElementById("ajouterStep");
+
+        formStep.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const figurineId = Number(document.getElementById("figurineStep").value);
+            const description = document.getElementById("descriptionStep").value;
+            const outil = document.getElementById("outilStep").value;
+            const ordre = Number(document.getElementById("ordreStep").value);
+
+            const nouvelleStep = {
+                figurine: figurineId,
+                description: description,
+                outil: outil,
+                ordre: ordre
+            };
+
+            fetch("http://127.0.0.1:8000/steps/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(nouvelleStep)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(stepCreee) {
+                console.log(stepCreee);
+                chargerDonnees();
+            });
+        });
+
+        
     </script>
 </body>
 

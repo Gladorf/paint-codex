@@ -29,7 +29,13 @@ SECRET_KEY = 'django-insecure-f981&sffw*t6k)h_l&+8i*l_2ju0-@dn=$0*2-uz1sm-q0port
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+if "RENDER_EXTERNAL_HOSTNAME" in os.environ:
+    ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
 
 
 # Application definition
@@ -128,5 +134,8 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5500',
+    "http://127.0.0.1:5500",
 ]
+
+if "FRONTEND_ORIGIN" in os.environ:
+    CORS_ALLOWED_ORIGINS.append(os.environ["FRONTEND_ORIGIN"])
