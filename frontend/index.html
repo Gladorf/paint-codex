@@ -30,22 +30,30 @@
             width: 100%;
             box-sizing: border-box;
         }
+
+        .message {
+            font-weight: bold;
+            margin: 12px 0;
+        }
     </style>
 </head>
 
 <body>
     <h1>Paint Codex</h1>
-    <pre id="figurines">
-    {
-        le JSON apparaitra ici
-    }
-    </pre>
+    <div id="figurines"></div>
+    <div>
+        <label for="username">Utilisateur :</label>
+        <input type="text" id="username">
+    
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password">
+    </div>
+    <p id="message" class="message"></p>
     <form id="ajouterFig">
         <label for="nomFig">Figurine :</label>
         <input type="text" id="nomFig" required>
         <button>Ajouter</button>
     </form>
-    <br/>
     <form id="ajouterStep">
         <p>Step :</p>
         <label for="figurineStep">Figurine :</label>
@@ -82,8 +90,7 @@
                 const figurines = resultats[0];
                 const steps = resultats[1];
 
-                let html = "";
-                html += "<ul>";
+                const listeFigurines = document.createElement("ul");
 
 
                 const select = document.getElementById("figurineStep");
@@ -97,26 +104,26 @@
 
                     select.appendChild(option);
 
-                    html += "<li>";
-                    html += figurine.nom;
+                    const itemFigurine = document.createElement("li");
+                    itemFigurine.textContent = figurine.nom;
+                    listeFigurines.appendChild(itemFigurine);
                 
-                    html += "<ul>";
+                    const listeSteps = document.createElement("ul");
+                    itemFigurine.appendChild(listeSteps);
+
                     for(const step of steps) {
                         if(step.figurine === figurine.id) {
-                            html += "<li>";
-                            html += "#" + step.ordre + " " + step.description + " / " + step.outil;
-                            html += "</li>";
+                            const itemStep = document.createElement("li");
+                            itemStep.textContent = "#" + step.ordre + " " + step.description + " / " + step.outil;
+                            listeSteps.appendChild(itemStep);
                         }
                     }
-                    html += "</ul>";
 
-                    html += "</li>";
                 }
 
-                html += "</ul>";
-
                 const element = document.getElementById("figurines");
-                element.innerHTML = html;
+                element.innerHTML = "";
+                element.appendChild(listeFigurines);
             });
         }
         chargerDonnees();
@@ -125,6 +132,10 @@
 
         formFig.addEventListener("submit", function (event) {
             event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const credentials = btoa(username + ":" + password);
 
             const nom = document.getElementById("nomFig").value;
 
@@ -135,16 +146,25 @@
             fetch("https://paint-codex.onrender.com/figurines/", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic " + credentials
                 },
                 body: JSON.stringify(nouvelleFigurine)
             })
             .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la création");
+                }
+                
                 return response.json();
             })
-            .then(function(figurineCreee) {
-                console.log(figurineCreee);
+            .then(function() {
+                document.getElementById("message").textContent = "";
                 chargerDonnees();
+            })
+            .catch(function(error) {
+                const message = document.getElementById("message");
+                message.textContent = error.message;
             });
         });
 
@@ -152,6 +172,10 @@
 
         formStep.addEventListener("submit", function (event) {
             event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const credentials = btoa(username + ":" + password);
 
             const figurineId = Number(document.getElementById("figurineStep").value);
             const description = document.getElementById("descriptionStep").value;
@@ -168,16 +192,25 @@
             fetch("https://paint-codex.onrender.com/steps/", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic " + credentials
                 },
                 body: JSON.stringify(nouvelleStep)
             })
             .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la création");
+                }
+
                 return response.json();
             })
-            .then(function(stepCreee) {
-                console.log(stepCreee);
+            .then(function() {
+                document.getElementById("message").textContent = "";
                 chargerDonnees();
+            })
+            .catch(function(error) {
+                const message = document.getElementById("message");
+                message.textContent = error.message;
             });
         });
 
