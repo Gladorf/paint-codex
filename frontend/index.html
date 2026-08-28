@@ -70,10 +70,10 @@
     <script>
         function chargerDonnees() {
             Promise.all([
-                fetch("http://127.0.0.1:8000/figurines/").then(function(response) {
+                fetch("https://paint-codex.onrender.com/figurines/").then(function(response) {
                     return response.json();
                 }),
-                fetch("http://127.0.0.1:8000/steps/").then(function(response) {
+                fetch("https://paint-codex.onrender.com/steps/").then(function(response) {
                     return response.json();
                 })
             ])
@@ -131,7 +131,7 @@
                 nom: nom
             };
 
-            fetch("http://127.0.0.1:8000/figurines/", {
+            fetch("https://paint-codex.onrender.com/figurines/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -164,7 +164,7 @@
                 ordre: ordre
             };
 
-            fetch("http://127.0.0.1:8000/steps/", {
+            fetch("https://paint-codex.onrender.com/steps/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
