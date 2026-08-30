@@ -37,6 +37,12 @@ Paint-Codex follows a simple client-server architecture:
 
 [Open Paint-Codex](https://paint-codex-frontend.onrender.com)
 
+## Screenshots
+
+### Desktop
+
+![Paint-Codex desktop view](docs/desktop.png)
+
 ## Future Improvements
 
 Paint-Codex could be extended with features such as:

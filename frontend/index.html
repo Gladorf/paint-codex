@@ -11,8 +11,27 @@
             max-width: 700px;
             margin: 0 auto;
             padding: 16px;
+            background-color: #f3ead3;
+            color: #3f3426;
+        }
+
+        details {
+            border: 1px solid #b9a27a;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+            background-color: #fff8e8;
+        }
+
+        summary {
+            font-weight: bold;
+            color: #5f4a2f;
         }
     
+        form {
+            margin-bottom: 24px;
+        }
+
         input,
         select,
         button {
@@ -21,19 +40,33 @@
             margin: 4px 0;
         }
     
-        form {
-            margin-bottom: 24px;
-        }
-    
         input,
         select {
             width: 100%;
             box-sizing: border-box;
+            background-color: #fffaf0;
+            border: 1px solid #b9a27a;
+            color: #3f3426;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #d8c29d;
+            border: 1px solid #a88d63;
+            color: #3f3426;
+            border-radius: 4px;
         }
 
         .message {
             font-weight: bold;
             margin: 12px 0;
+        }
+
+        .delete-button {
+            font-size: 14px;
+            padding: 2px 6px;
+            margin-left: 8px;
+            background-color: #e3cfaa;
         }
     </style>
 </head>
@@ -124,12 +157,15 @@
 
                     select.appendChild(option);
 
-                    const itemFigurine = document.createElement("li");
-                    itemFigurine.textContent = figurine.nom;
+                    const detailsFigurine = document.createElement("details");
+                    const summaryFigurine = document.createElement("summary");
+                    summaryFigurine.textContent = figurine.nom;
+                    detailsFigurine.appendChild(summaryFigurine);
 
                     // Bouton qui permettra de supprimer une figurine
                     const itemDeleteFig = document.createElement("button");
-                    itemDeleteFig.textContent = "Supprimer";
+                    itemDeleteFig.textContent = "x";
+                    itemDeleteFig.classList.add("delete-button");
 
                     itemDeleteFig.addEventListener("click", function () {
 
@@ -163,11 +199,11 @@
                         });
                     });
 
-                    itemFigurine.appendChild(itemDeleteFig);
-                    listeFigurines.appendChild(itemFigurine);
+                    summaryFigurine.appendChild(itemDeleteFig);
+                    listeFigurines.appendChild(detailsFigurine);
                 
                     const listeSteps = document.createElement("ul");
-                    itemFigurine.appendChild(listeSteps);
+                    detailsFigurine.appendChild(listeSteps);
 
                     for (const step of steps) {
                         if (step.figurine === figurine.id) {
@@ -175,7 +211,8 @@
                             itemStep.textContent = "#" + step.ordre + " " + step.description + " / " + step.outil;
 
                             const itemDeleteStep = document.createElement("button");
-                            itemDeleteStep.textContent = "Supprimer";
+                            itemDeleteStep.textContent = "x";
+                            itemDeleteStep.classList.add("delete-button");
 
                             itemDeleteStep.addEventListener("click", function () {
 
