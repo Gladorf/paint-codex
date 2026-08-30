@@ -47,7 +47,7 @@ Paint-Codex follows a simple client-server architecture:
 
 Paint-Codex could be extended with features such as:
 
-- Editing and deleting miniatures and painting steps.
+- Editing miniatures and painting steps.
 - Reordering painting steps.
 - Organizing a miniature into different painting zones.
 - Creating reusable painting recipes.
