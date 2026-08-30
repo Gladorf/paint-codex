@@ -40,7 +40,9 @@
 
 <body>
     <h1>Paint Codex</h1>
+    <!-- Zone pour affichage des figurines et etapes de peinture -->
     <div id="figurines"></div>
+    <!-- Zone d'identification nécessaire pour les opérations d'écriture -->
     <div>
         <label for="username">Utilisateur :</label>
         <input type="text" id="username">
@@ -48,12 +50,15 @@
         <label for="password">Mot de passe :</label>
         <input type="password" id="password">
     </div>
+    <!-- Zone pour afficher les messages erreurs -->
     <p id="message" class="message"></p>
+    <!-- Formulaire pour ajouter de figurine -->
     <form id="ajouterFig">
         <label for="nomFig">Figurine :</label>
         <input type="text" id="nomFig" required>
         <button>Ajouter</button>
     </form>
+    <!-- Formulaire pour ajout de step -->
     <form id="ajouterStep">
         <p>Step :</p>
         <label for="figurineStep">Figurine :</label>
@@ -77,6 +82,20 @@
         <button>Ajouter</button>
     </form>
     <script>
+        /*
+        Construit le header Basic Auth à partir des identifiants saisis
+        */
+        function getAuthorizationHeader() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const credentials = btoa(username + ":" + password);
+
+            return "Basic " + credentials;
+        }
+
+        /*
+        Charge les figurines et les étapes depuis l'API REST pour construire l'affichage
+        */
         function chargerDonnees() {
             Promise.all([
                 fetch("https://paint-codex.onrender.com/figurines/").then(function(response) {
@@ -98,6 +117,7 @@
 
                 for(const figurine of figurines) {
 
+                    // Pour remplir le select de nom de figurine nécessaire à l'ajout d'un step
                     const option = document.createElement("option");
                     option.value = figurine.id;
                     option.textContent = figurine.nom;
@@ -106,15 +126,90 @@
 
                     const itemFigurine = document.createElement("li");
                     itemFigurine.textContent = figurine.nom;
+
+                    // Bouton qui permettra de supprimer une figurine
+                    const itemDeleteFig = document.createElement("button");
+                    itemDeleteFig.textContent = "Supprimer";
+
+                    itemDeleteFig.addEventListener("click", function () {
+
+                        // Demander confirmation avant de réellement executer
+                        const confirme = confirm(
+                            "Supprimer \"" + figurine.nom + "\" et toutes ses étapes ?"
+                        );
+                        if (!confirme) {
+                            return;
+                        }
+
+                        // Appel au DELETE via API REST
+                        fetch("https://paint-codex.onrender.com/figurines/" + figurine.id + "/", {
+                            method: "DELETE",
+                            headers: {
+                                "Authorization": getAuthorizationHeader()
+                            }
+                        })
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error("Erreur lors de la suppression");
+                            }
+
+                            // Si tout se passe bien on recharge les données, sinon on lève une exception
+                            document.getElementById("message").textContent = "";
+                            chargerDonnees();
+                        })
+                        .catch(function(error) {
+                            const message = document.getElementById("message");
+                            message.textContent = error.message;
+                        });
+                    });
+
+                    itemFigurine.appendChild(itemDeleteFig);
                     listeFigurines.appendChild(itemFigurine);
                 
                     const listeSteps = document.createElement("ul");
                     itemFigurine.appendChild(listeSteps);
 
-                    for(const step of steps) {
-                        if(step.figurine === figurine.id) {
+                    for (const step of steps) {
+                        if (step.figurine === figurine.id) {
                             const itemStep = document.createElement("li");
                             itemStep.textContent = "#" + step.ordre + " " + step.description + " / " + step.outil;
+
+                            const itemDeleteStep = document.createElement("button");
+                            itemDeleteStep.textContent = "Supprimer";
+
+                            itemDeleteStep.addEventListener("click", function () {
+
+                                // Demander confirmation avant de réellement executer
+                                const confirme = confirm(
+                                    "Supprimer l'étape n°" + step.ordre + " : \"" + step.description + "\" ?"
+                                );
+                                if (!confirme) {
+                                    return;
+                                }
+
+                                // Appel au DELETE via API REST
+                                fetch("https://paint-codex.onrender.com/steps/" + step.id + "/", {
+                                    method: "DELETE",
+                                    headers: {
+                                        "Authorization": getAuthorizationHeader()
+                                    }
+                                })
+                                .then(function (response) {
+                                    if (!response.ok) {
+                                        throw new Error("Erreur lors de la suppression");
+                                    }
+
+                                    // Si tout se passe bien on recharge les données, sinon on lève une exception
+                                    document.getElementById("message").textContent = "";
+                                    chargerDonnees();
+                                })
+                                .catch(function (error) {
+                                    const message = document.getElementById("message");
+                                    message.textContent = error.message;
+                                });
+                            });
+
+                            itemStep.appendChild(itemDeleteStep);
                             listeSteps.appendChild(itemStep);
                         }
                     }
@@ -133,21 +228,19 @@
         formFig.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const credentials = btoa(username + ":" + password);
-
+            // Récupération du nom de la figurine et création du JSON
             const nom = document.getElementById("nomFig").value;
 
             const nouvelleFigurine = {
                 nom: nom
             };
 
+            // Appel au POST via API REST
             fetch("https://paint-codex.onrender.com/figurines/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": "Basic " + credentials
+                    "Authorization": getAuthorizationHeader()
                 },
                 body: JSON.stringify(nouvelleFigurine)
             })
@@ -159,6 +252,7 @@
                 return response.json();
             })
             .then(function() {
+                // Si tout se passe bien on efface le message d'erreur et on recharge les données, sinon on lève une exception
                 document.getElementById("message").textContent = "";
                 chargerDonnees();
             })
@@ -173,10 +267,7 @@
         formStep.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-            const credentials = btoa(username + ":" + password);
-
+            // Récupération des informations de la step et création du JSON
             const figurineId = Number(document.getElementById("figurineStep").value);
             const description = document.getElementById("descriptionStep").value;
             const outil = document.getElementById("outilStep").value;
@@ -189,11 +280,12 @@
                 ordre: ordre
             };
 
+            // Appel au POST via API REST
             fetch("https://paint-codex.onrender.com/steps/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": "Basic " + credentials
+                    "Authorization": getAuthorizationHeader()
                 },
                 body: JSON.stringify(nouvelleStep)
             })
@@ -205,6 +297,7 @@
                 return response.json();
             })
             .then(function() {
+                // Si tout se passe bien on efface le message d'erreur et on recharge les données, sinon on lève une exception
                 document.getElementById("message").textContent = "";
                 chargerDonnees();
             })
